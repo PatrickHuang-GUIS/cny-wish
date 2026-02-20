@@ -128,6 +128,56 @@
             0%, 100% { transform: rotate(-10deg); }
             50% { transform: rotate(10deg); }
         }
+
+        /* 新增：祝福语弹窗样式 */
+        .blessing-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .blessing-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            padding: 30px 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: #333;
+            font-size: 1.5rem;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 80%;
+        }
+        .modal-content p {
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+        }
+        .close-modal {
+            margin-top: 20px;
+            background: #ff3333;
+            border: none;
+            padding: 8px 20px;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        @keyframes modalPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -142,7 +192,7 @@
         <p id="greeting-text">
             祝 <span class="nickname" id="name-display">好朋友</span><br>
             马年大吉，万事顺意！<br>
-            一马当先，马到成功！
+            身体健康，财源滚滚！
         </p>
         
         <!-- 如果 URL 里没有名字，显示这个输入框让用户自己填，增加互动性 -->
@@ -153,7 +203,15 @@
         </div>
         
         <div style="margin-top: 20px;">
-            <a href="#" class="btn" onclick="sendRedPacket()">🧧 领取好运</a>
+            <a href="#" class="btn" onclick="sendRedPacket(event)">🧧 领取好运</a>
+        </div>
+    </div>
+
+    <!-- 新增：祝福语弹窗 -->
+    <div class="blessing-modal" id="blessingModal">
+        <div class="modal-content">
+            <p id="randomBlessing"></p>
+            <button class="close-modal" onclick="closeModal()">关闭</button>
         </div>
     </div>
 
@@ -187,11 +245,47 @@
             }
         }
 
-        function sendRedPacket() {
-            alert("🧧 好运已到账！祝你新的一年欧气满满！");
+        // 2. 新增：好运祝福语列表（更新为马年相关）
+        const blessingList = [
+            "🧧 新的一年，暴富暴美，好运连连！",
+            "🐴 马到成功，事事顺心，平安喜乐！",
+            "💰 财运亨通，八方来财，日进斗金！",
+            "🌟 前程似锦，一路开挂，万事胜意！",
+            "💖 平安健康，阖家幸福，喜乐无忧！",
+            "🎊 心想事成，美梦成真，好运爆棚！",
+            "🍀 出门遇贵人，在家听喜报，马年行大运！",
+            "🎉 升职加薪，财源滚滚，福气满满！",
+            "🥳 笑口常开，烦恼全消，好运挡不住！",
+            "✨ 所求皆如愿，所行皆坦途，马年大吉！"
+        ];
+
+        // 3. 修改：领取好运函数（随机生成祝福语）
+        function sendRedPacket(event) {
+            event.preventDefault(); // 阻止默认链接行为
+            const userName = nameDisplay.innerText;
+            // 随机选择一条祝福语
+            const randomIndex = Math.floor(Math.random() * blessingList.length);
+            let randomBlessing = blessingList[randomIndex];
+            // 将祝福语中的占位符替换为用户名字（如果有）
+            randomBlessing = randomBlessing.replace(/你/g, userName);
+            
+            // 显示弹窗
+            document.getElementById('randomBlessing').innerText = randomBlessing;
+            document.getElementById('blessingModal').classList.add('show');
+            
+            // 触发烟花特效
+            createFirework(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight / 2
+            );
         }
 
-        // 2. 简单的烟花特效逻辑
+        // 新增：关闭弹窗函数
+        function closeModal() {
+            document.getElementById('blessingModal').classList.remove('show');
+        }
+
+        // 4. 简单的烟花特效逻辑
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
