@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>新年快乐</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f0c29;  /* fallback for old browsers */
+            background: -webkit-linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+            background: linear-gradient(to bottom, #24243e, #302b63, #0f0c29);
+            overflow: hidden;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .content {
+            z-index: 10;
+            position: relative;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            max-width: 80%;
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ff8c00;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .nickname {
+            font-weight: bold;
+            color: #ff6b6b;
+            font-size: 1.4rem;
+            display: inline-block;
+            border-bottom: 2px dashed #ff6b6b;
+            padding: 0 5px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+            border: none;
+            padding: 12px 30px;
+            color: white;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4);
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 输入框样式 (如果没有获取到名字时显示) */
+        .input-group {
+            display: none; /* 默认隐藏 */
+            margin-top: 15px;
+        }
+        
+        input {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            text-align: center;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .lantern {
+            position: absolute;
+            top: -50px;
+            width: 40px;
+            height: 60px;
+            background: #ff3333;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ff3333;
+            z-index: 5;
+            animation: swing 3s infinite ease-in-out;
+        }
+        .lantern::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 18px;
+            width: 4px;
+            height: 20px;
+            background: #ffd700;
+        }
+        .l-left { left: 10%; animation-delay: 0s; }
+        .l-right { right: 10%; animation-delay: 1.5s; }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+    
+    <div class="lantern l-left"></div>
+    <div class="lantern l-right"></div>
+
+    <div class="content">
+        <h1>🧧 新年快乐 🧧</h1>
+        <p id="greeting-text">
+            祝 <span class="nickname" id="name-display">好朋友</span><br>
+            龙年大吉，万事顺意！<br>
+            身体健康，财源滚滚！
+        </p>
+        
+        <!-- 如果 URL 里没有名字，显示这个输入框让用户自己填，增加互动性 -->
+        <div class="input-group" id="input-area">
+            <p style="font-size: 0.9rem; color: #ddd;">(链接未携带名字，请输入你的昵称)</p>
+            <input type="text" id="user-input" placeholder="输入你的名字">
+            <button class="btn" onclick="submitName()" style="margin-top:10px; padding: 5px 20px; font-size: 0.9rem;">生成祝福</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="#" class="btn" onclick="sendRedPacket()">🧧 领取好运</a>
+        </div>
+    </div>
+
+    <script>
+        // 1. 获取 URL 中的 name 参数
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        const nameFromUrl = getQueryParam('name');
+        const nameDisplay = document.getElementById('name-display');
+        const inputArea = document.getElementById('input-area');
+
+        if (nameFromUrl) {
+            // 如果 URL 里有名字，直接显示
+            nameDisplay.innerText = decodeURIComponent(nameFromUrl);
+        } else {
+            // 如果没有名字，显示输入框，让用户自己玩
+            inputArea.style.display = 'block';
+            nameDisplay.innerText = "你"; // 默认显示
+        }
+
+        function submitName() {
+            const inputVal = document.getElementById('user-input').value;
+            if(inputVal.trim() !== "") {
+                nameDisplay.innerText = inputVal;
+                inputArea.style.display = 'none';
+                // 触发烟花特效增强
+                createFirework(window.innerWidth/2, window.innerHeight/2);
+            }
+        }
+
+        function sendRedPacket() {
+            alert("🧧 好运已到账！祝你新的一年欧气满满！");
+        }
+
+        // 2. 简单的烟花特效逻辑
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let fireworks = [];
+        let particles = [];
+
+        function random(min, max) { return Math.random() * (max - min) + min; }
+
+        class Firework {
+            constructor(sx, sy, tx, ty) {
+                this.x = sx; this.y = sy;
+                this.sx = sx; this.sy = sy;
+                this.tx = tx; this.ty = ty;
+                this.distanceToTarget = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
+                this.distanceTraveled = 0;
+                this.coordinates = [];
+                this.coordinateCount = 3;
+                while (this.coordinateCount--) { this.coordinates.push([this.x, this.y]); }
+                this.angle = Math.atan2(ty - sy, tx - sx);
+                this.speed = 2;
+                this.acceleration = 1.05;
+                this.brightness = random(50, 70);
+            }
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+                this.speed *= this.acceleration;
+                const vx = Math.cos(this.angle) * this.speed;
+                const vy = Math.sin(this.angle) * this.speed;
+                this.distanceTraveled = Math.sqrt(Math.pow(this.sx - this.x, 2) + Math.pow(this.sy - this.y, 2));
+                if (this.distanceTraveled >= this.distanceToTarget) {
+                    createParticles(this.tx, this.ty);
+                    fireworks.splice(index, 1);
+                } else {
+                    this.x += vx;
+                    this.y += vy;
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = 'hsl(' + hue + ', 100%, ' + this.brightness + '%)';
+                ctx.stroke();
+            }
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.coordinates = [];
+                this.coordinateCount = 5;
+                while (this.coordinateCount--) { this.coordinates.push([this.x, this.y]); }
+                this.angle = random(0, Math.PI * 2);
+                this.speed = random(1, 10);
+                this.friction = 0.95;
+                this.gravity = 1;
+                this.hue = random(hue - 20, hue + 20);
+                this.brightness = random(50, 80);
+                this.alpha = 1;
+                this.decay = random(0.015, 0.03);
+            }
+            update(index) {
+                this.coordinates.pop();
+                this.coordinates.unshift([this.x, this.y]);
+                this.speed *= this.friction;
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed + this.gravity;
+                this.alpha -= this.decay;
+                if (this.alpha <= this.decay) { particles.splice(index, 1); }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.moveTo(this.coordinates[this.coordinates.length - 1][0], this.coordinates[this.coordinates.length - 1][1]);
+                ctx.lineTo(this.x, this.y);
+                ctx.strokeStyle = 'hsla(' + this.hue + ', 100%, ' + this.brightness + '%, ' + this.alpha + ')';
+                ctx.stroke();
+            }
+        }
+
+        function createParticles(x, y) {
+            let particleCount = 30;
+            while (particleCount--) { particles.push(new Particle(x, y)); }
+        }
+
+        let hue = 120;
+        function loop() {
+            requestAnimationFrame(loop);
+            hue += 0.5;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'lighter';
+            
+            let i = fireworks.length;
+            while (i--) { fireworks[i].draw(); fireworks[i].update(i); }
+            
+            let j = particles.length;
+            while (j--) { particles[j].draw(); particles[j].update(j); }
+            
+            if (Math.random() < 0.05) { // 自动发射频率
+                fireworks.push(new Firework(canvas.width / 2, canvas.height, random(0, canvas.width), random(0, canvas.height / 2)));
+            }
+        }
+        
+        function createFirework(x, y) {
+             fireworks.push(new Firework(canvas.width / 2, canvas.height, x, y));
+        }
+
+        window.onload = loop;
+        window.onresize = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        };
+    </script>
+</body>
+</html>
